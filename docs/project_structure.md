@@ -34,3 +34,4 @@
     - {model_name}.py
   - schemas
     - {model_name}.py
+  - main.py

@@ -1,0 +1,68 @@
+{
+  "configurations": [
+    {
+      "name": "Web API",
+      "consoleName": "Web API",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "app.main:app",
+        "--reload",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--workers",
+        "1"
+      ],
+      "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "jinja": true,
+      "justMyCode": true
+    },
+    {
+      "name": "Celery IO Worker",
+      "consoleName": "Celery IO Worker",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "celery",
+      "args": [
+        "-A",
+        "celery_apps.io_worker.main.celery_app",
+        "worker",
+        "--loglevel=info",
+        "--pool",
+        "threads",
+        "--concurrency",
+        "4",
+        "-Q",
+        "io_queue"
+      ],
+      "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "justMyCode": true,
+      "jinja": true
+    },
+    {
+      "name": "Celery CPU Worker",
+      "consoleName": "Celery CPU Worker",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "celery",
+      "args": [
+        "-A",
+        "celery_apps.cpu_worker.main.celery_app",
+        "worker",
+        "--loglevel=info",
+        "--pool",
+        "solo",
+        "--concurrency",
+        "1",
+        "-Q",
+        "cpu_queue"
+      ],
+      "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "justMyCode": true,
+      "jinja": true
+    }
+  ]
+}

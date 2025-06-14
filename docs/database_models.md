@@ -20,7 +20,8 @@
 - id: UUID
 - brand_id: UUID (FK to CarBrand)
 - name: str (Camry, Golf, X5, etc.)
-- years_production: JSON ({"start": 2010, "end": 2020})
+- year_from: datetime
+- year_to: datetime
 - body_type: str (седан, хетчбек, кросовер)
 - created_at: datetime
 
