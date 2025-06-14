@@ -1,0 +1,36 @@
+- alembic
+  - versions
+  - env.py
+  - script.py.mako
+- common
+  - database
+    - cruds
+      - base.py
+      - {model_name}.py
+    - models
+      - {model_name}.py
+    - schemas
+      - {model_name}.py
+  - utils
+    - {util_name}.py
+  - services
+    - {service_name}.py
+- celery
+  - io_worker
+    - {folder_for_each_task}
+      - tasks.py
+      - utils.py
+    - main.py
+  - cpu_worker
+    - {folder_for_each_task}
+      - tasks.py
+      - utils.py
+    - main.py
+  - base.py
+- app
+  - dependencies
+    - {dependency}.py
+  - routers
+    - {model_name}.py
+  - schemas
+    - {model_name}.py
