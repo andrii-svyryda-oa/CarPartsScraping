@@ -1,6 +1,6 @@
 import re
 from urllib.parse import urljoin
-from playwright.async_api import async_playwright
+from playwright.async_api import async_playwright, Page
 from bs4 import BeautifulSoup
 
 from common.services.scraping.parts.base import BasePartScraper, implements_platform_scraper, ScrapedPart
@@ -19,21 +19,16 @@ class ExistsPartScraper(BasePartScraper):
             try:
                 # Navigate to the base URL
                 await page.goto(self.car_model_platform.platform_url, wait_until="networkidle")
-                await page.wait_for_timeout(3000)  # Wait for dynamic content to load
+                await page.wait_for_timeout(1000)  # Wait for dynamic content to load
                 
                 # Find parts category section based on part_category.name
                 category_found = await self._find_and_click_category(page, self.part_category.name)
                 
                 if category_found:
                     # Wait for parts to load after category selection
-                    await page.wait_for_timeout(5000)
+                    await page.wait_for_timeout(2000)
                     
-                    # Get updated HTML content after category selection
-                    html_content = await page.content()
-                    soup = BeautifulSoup(html_content, 'html.parser')
-                    
-                    # Extract parts data using the actual Exist website structure
-                    scraped_parts = self._extract_parts_data(soup, page.url)
+                    scraped_parts = await self._extract_all_pages_parts_data(page)
                 
             except Exception as e:
                 print(f"Error scraping Exist website: {e}")
@@ -47,25 +42,16 @@ class ExistsPartScraper(BasePartScraper):
         Find and click on the specified category
         """
         try:
-            # Try to find category by text content (case-insensitive)
-            category_selectors = [
-                f"a:has-text('{category_name}')",
-                f"a:area-label('{category_name}')",
-            ]
-            
-            for selector in category_selectors:
-                try:
-                    element = page.locator(selector).first
-                    if await element.is_visible():
-                        await element.click()
-                        return True
-                    else: 
-                        print(f"Category {category_name} not found")
-                except Exception as e:
-                    print(f"Error finding category: {e}")
-                    continue
-            
-            # Try manual search through navigation elements
+            try:
+                element = page.locator(f"[class^='PopularCategoriesstyle__PopularCategoriesList-sc-'] a[aria-label='{category_name}']").first
+                if await element.is_visible():
+                    await element.click()
+                    return True
+                else: 
+                    print(f"Category {category_name} not found")
+            except Exception as e:
+                print(f"Error finding category: {e}")
+
             nav_links = await page.locator("a, button").all()
             for link in nav_links:
                 try:
@@ -80,11 +66,35 @@ class ExistsPartScraper(BasePartScraper):
         except Exception as e:
             print(f"Error finding category: {e}")
             return False
-    
+        
+    async def _extract_all_pages_parts_data(self, page: Page) -> list[ScrapedPart]:
+        scraped_parts = []
+        current_page = 1
+        total_pages = 50
+        
+        while current_page <= total_pages:
+            print(f"Scraping page {current_page}")
+            try:
+                await page.wait_for_timeout(2000)
+                html_content = await page.content()
+                soup = BeautifulSoup(html_content, 'html.parser')
+                scraped_parts.extend(self._extract_parts_data(soup, page.url))
+                
+                next_button_selector = '[aria-label="nextPage"]'
+                next_page_button = soup.select_one(next_button_selector)
+                
+                if not next_page_button or next_page_button.has_attr('disabled'):
+                    break
+
+                await page.click(next_button_selector)
+                current_page += 1
+            except Exception as e:
+                print(f"Error scraping page {current_page}: {e}")
+                break
+
+        return scraped_parts
+        
     def _extract_parts_data(self, soup: BeautifulSoup, current_url: str) -> list[ScrapedPart]:
-        """
-        Extract parts data from the HTML soup using actual Exist website structure
-        """
         scraped_parts = []
         
         parts_elements = soup.select('[class^="Liststyle__CatalogueList-sc-"] [class^="ListItemstyle__CatalogueListItem-"]')
@@ -164,7 +174,7 @@ class ExistsPartScraper(BasePartScraper):
     def _extract_url(self, element, base_url: str) -> str | None:
         """Extract part URL from the title link"""
         # Look for the specific title link in Exist structure
-        link = element.select_one('.ListItemTitlestyle__CatalogueListItemTitleLink-sc-904etm-1')
+        link = element.select_one('[class^="ListItemTitlestyle__CatalogueListItemTitleLink-sc-"]')
         if link and link.get('href'):
             href = link['href']
             return urljoin(base_url, href) if href.startswith('/') else href
@@ -173,12 +183,12 @@ class ExistsPartScraper(BasePartScraper):
     def _extract_title(self, element) -> str | None:
         """Extract part title from the specific Exist structure"""
         # Try the button first
-        title_elem = element.select_one('.ListItemTitlestyle__CatalogueListItemTitleButton-sc-904etm-0 strong')
+        title_elem = element.select_one('[class^="ListItemTitlestyle__CatalogueListItemTitleButton-sc-"] strong')
         if title_elem:
             return title_elem.get_text(strip=True)
         
         # Fallback to link
-        title_elem = element.select_one('.ListItemTitlestyle__CatalogueListItemTitleLink-sc-904etm-1 strong')
+        title_elem = element.select_one('[class^="ListItemTitlestyle__CatalogueListItemTitleLink-sc-"] strong')
         if title_elem:
             return title_elem.get_text(strip=True)
         
@@ -187,7 +197,7 @@ class ExistsPartScraper(BasePartScraper):
     def _extract_article_number(self, element) -> str | None:
         """Extract article number from the brand/article section"""
         # Look for the trademark section that contains brand and article
-        trademark_elem = element.select_one('.ListItemTitlestyle__CatalogueListItemTrademark-sc-904etm-2')
+        trademark_elem = element.select_one('[class^="ListItemTitlestyle__CatalogueListItemTrademark-sc-"]')
         if trademark_elem:
             spans = trademark_elem.find_all('span')
             if len(spans) >= 2:
@@ -199,7 +209,7 @@ class ExistsPartScraper(BasePartScraper):
     
     def _extract_price(self, element) -> float | None:
         """Extract price from the specific Exist price structure"""
-        price_elem = element.select_one('.ListItemPricestyle__CatalogueListItemPriceValue-sc-qbj488-3')
+        price_elem = element.select_one('[class^="ListItemPricestyle__CatalogueListItemPriceValue-sc-"]')
         if price_elem:
             price_text = price_elem.get_text(strip=True)
             # Remove non-breaking spaces and other formatting
@@ -218,7 +228,7 @@ class ExistsPartScraper(BasePartScraper):
     def _extract_availability_status(self, element) -> str | None:
         """Extract availability status"""
         # Look for quantity information
-        quantity_elem = element.select_one('.ListItemShortInfostyle__ProductQuantityContainer-sc-1aqe25j-3')
+        quantity_elem = element.select_one('[class^="ListItemShortInfostyle__ProductQuantityContainer-sc-"]')
         if quantity_elem:
             quantity_text = quantity_elem.get_text(strip=True)
             if quantity_text and quantity_text != '0':
@@ -227,7 +237,7 @@ class ExistsPartScraper(BasePartScraper):
                 return "Out of Stock"
         
         # Check for compatibility indicator (if present, usually means available)
-        compat_elem = element.select_one('.ListItemstyle__CatalogueListItemApplicability-sc-1gf1g4g-5')
+        compat_elem = element.select_one('[class^="ListItemstyle__CatalogueListItemApplicability-sc-"]')
         if compat_elem:
             return "Available"
         
@@ -235,7 +245,7 @@ class ExistsPartScraper(BasePartScraper):
     
     def _extract_delivery_days(self, element) -> int | None:
         """Extract delivery information"""
-        delivery_elem = element.select_one('.ProductDeliveryInfostyle__ProductDeliveryDay-sc-dpwf60-2')
+        delivery_elem = element.select_one('[class^="ProductDeliveryInfostyle__ProductDeliveryDay-sc-"]')
         if delivery_elem:
             delivery_text = delivery_elem.get_text(strip=True).lower()
             if 'завтра' in delivery_text:
@@ -256,12 +266,12 @@ class ExistsPartScraper(BasePartScraper):
     def _extract_seller_name(self, element) -> str | None:
         """Extract brand/seller name"""
         # Look for brand information
-        brand_elem = element.select_one('.ListItemShortInfostyle__CatalogueListItemTrademarkInfo-sc-1aqe25j-1')
+        brand_elem = element.select_one('[class^="ListItemShortInfostyle__CatalogueListItemTrademarkInfo-sc-"]')
         if brand_elem:
             return brand_elem.get_text(strip=True)
         
         # Fallback: extract from trademark section
-        trademark_elem = element.select_one('.ListItemTitlestyle__CatalogueListItemTrademark-sc-904etm-2 span:first-child')
+        trademark_elem = element.select_one('[class^="ListItemTitlestyle__CatalogueListItemTrademark-sc-"] span:first-child')
         if trademark_elem:
             return trademark_elem.get_text(strip=True)
         
@@ -269,7 +279,7 @@ class ExistsPartScraper(BasePartScraper):
     
     def _extract_quantity_info(self, element) -> str | None:
         """Extract quantity information for debugging"""
-        quantity_elem = element.select_one('.ListItemShortInfostyle__ProductQuantityContainer-sc-1aqe25j-3')
+        quantity_elem = element.select_one('[class^="ListItemShortInfostyle__ProductQuantityContainer-sc-"]')
         if quantity_elem:
             return quantity_elem.get_text(strip=True)
         return None
@@ -277,7 +287,7 @@ class ExistsPartScraper(BasePartScraper):
     def _extract_images(self, element, base_url: str) -> list[str] | None:
         """Extract product images"""
         images = []
-        img_element = element.select_one('.ListItemImagestyle__CatalogueListItemImageButton-sc-1xm3m92-0 img')
+        img_element = element.select_one('[class^="ListItemImagestyle__CatalogueListItemImageButton-sc-"] img')
         
         if img_element:
             src = img_element.get('src')
