@@ -25,8 +25,9 @@ class ScrapedPart(BaseModel):
 
 @dataclass
 class BasePartScraper:
-    car_model_platform: CarModelPlatform
-    part_category: PartCategory
+    platform_url: str
+    category: str
+    pages: int = 10
     
     @abstractmethod
     async def __call__(self) -> list[ScrapedPart]:

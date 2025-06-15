@@ -22,19 +22,9 @@ if not scraper_cls:
     raise ValueError("Scraper not found")
 
 scraper = scraper_cls(
-    car_model_platform=CarModelPlatform(
-        id=uuid.uuid4(),
-        created_at=datetime.datetime.now(),
-        car_model_id=uuid.uuid4(),
-        platform_id=uuid.uuid4(),
-        platform_url="https://exist.ua/uk/volkswagen-cars/golf-vii-5g1-be1-13954/modif-60377/",
-    ),
-    part_category=PartCategory(
-        id=uuid.uuid4(),
-        name="Двірники",
-        description="Двірники",
-        created_at=datetime.datetime.now(),
-    )
+    platform_url="https://exist.ua/uk/volkswagen-cars/golf-vii-5g1-be1-13954/modif-60377/",
+    category="Двірники",
+    pages=1
 )
 
 async def main():

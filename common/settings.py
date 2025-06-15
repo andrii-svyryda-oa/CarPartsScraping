@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     REDIS_RESULT_BACKEND: Optional[str]
     
     ENVIRONMENT: str = "development"
+    FILES_DIR: str = "files"
 
     class Config:
         env_file = ".env"

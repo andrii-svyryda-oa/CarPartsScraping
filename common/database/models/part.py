@@ -10,7 +10,7 @@ class Part(Base):
     __tablename__ = "parts"
     
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    oem_number: Mapped[str] = mapped_column(String, nullable=False)
+    oem_number: Mapped[str] = mapped_column(String, nullable=False, unique=True, index=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     category_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("part_categories.id"), nullable=False)
     manufacturer_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("part_manufacturers.id"), nullable=False)

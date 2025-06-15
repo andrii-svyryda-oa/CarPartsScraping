@@ -26,12 +26,13 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         result = await self.db.execute(stmt)
         return list(result.scalars().all())
 
-    async def create(self, *, obj_in: CreateSchemaType) -> ModelType:
+    async def create(self, *, obj_in: CreateSchemaType, commit: bool = True) -> ModelType:
         obj_in_data = obj_in.model_dump()
         db_obj = self.model(**obj_in_data)
         self.db.add(db_obj)
-        await self.db.commit()
-        await self.db.refresh(db_obj)
+        if commit:
+            await self.db.commit()
+            await self.db.refresh(db_obj)
         return db_obj
 
     async def update(
@@ -68,3 +69,17 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         stmt = select(self.model).where(self.model.id == id)
         result = await self.db.execute(stmt)
         return result.first() is not None
+    
+    async def get_by_ids(self, ids: list[Any]) -> list[ModelType]:
+        stmt = select(self.model).where(self.model.id.in_(ids))
+        result = await self.db.execute(stmt)
+        return list(result.scalars().all())
+    
+    async def create_many(self, objs_in: list[CreateSchemaType], commit: bool = True) -> list[ModelType]:
+        objs_in_data = [obj_in.model_dump() for obj_in in objs_in]
+        db_objs = [self.model(**obj_in_data) for obj_in_data in objs_in_data]
+        self.db.add_all(db_objs)
+        if commit:
+            await self.db.commit()
+            await self.db.refresh(db_objs)
+        return db_objs

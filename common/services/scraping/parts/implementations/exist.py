@@ -18,11 +18,11 @@ class ExistsPartScraper(BasePartScraper):
             
             try:
                 # Navigate to the base URL
-                await page.goto(self.car_model_platform.platform_url, wait_until="networkidle")
+                await page.goto(self.platform_url, timeout=120000, wait_until="networkidle")
                 await page.wait_for_timeout(1000)  # Wait for dynamic content to load
                 
                 # Find parts category section based on part_category.name
-                category_found = await self._find_and_click_category(page, self.part_category.name)
+                category_found = await self._find_and_click_category(page, self.category)
                 
                 if category_found:
                     # Wait for parts to load after category selection
@@ -70,15 +70,14 @@ class ExistsPartScraper(BasePartScraper):
     async def _extract_all_pages_parts_data(self, page: Page) -> list[ScrapedPart]:
         scraped_parts = []
         current_page = 1
-        total_pages = 50
         
-        while current_page <= total_pages:
+        while current_page <= self.pages:
             print(f"Scraping page {current_page}")
             try:
                 await page.wait_for_timeout(2000)
                 html_content = await page.content()
                 soup = BeautifulSoup(html_content, 'html.parser')
-                scraped_parts.extend(self._extract_parts_data(soup, page.url))
+                scraped_parts.extend(await self._extract_parts_data(soup, page.url, page))
                 
                 next_button_selector = '[aria-label="nextPage"]'
                 next_page_button = soup.select_one(next_button_selector)
@@ -94,16 +93,16 @@ class ExistsPartScraper(BasePartScraper):
 
         return scraped_parts
         
-    def _extract_parts_data(self, soup: BeautifulSoup, current_url: str) -> list[ScrapedPart]:
+    async def _extract_parts_data(self, soup: BeautifulSoup, current_url: str, page: Page) -> list[ScrapedPart]:
         scraped_parts = []
         
         parts_elements = soup.select('[class^="Liststyle__CatalogueList-sc-"] [class^="ListItemstyle__CatalogueListItem-"]')
         
         print(f"Found {len(parts_elements)} product items")
         
-        for index, part_element in enumerate(parts_elements[:50]):  # Limit to first 50 results
+        for index, part_element in enumerate(parts_elements):  # Limit to first 50 results
             try:
-                scraped_part = self._extract_single_part_data(part_element, current_url, index + 1)
+                scraped_part = await self._extract_single_part_data_with_details(part_element, current_url, index + 1, page)
                 if scraped_part:
                     scraped_parts.append(scraped_part)
             except Exception as e:
@@ -111,6 +110,56 @@ class ExistsPartScraper(BasePartScraper):
                 continue
         
         return scraped_parts
+    
+    async def _extract_single_part_data_with_details(self, part_element, base_url: str, position: int, main_page: Page) -> ScrapedPart | None:
+        """
+        Extract data for a single part from its HTML element and additional details from product page
+        """
+        try:
+            # First extract basic data from listing
+            scraped_part = self._extract_single_part_data(part_element, base_url, position)
+            if not scraped_part:
+                return None
+            
+            # Open product page in new tab to get additional details
+            product_url = scraped_part.url
+            if product_url:
+                try:
+                    # Create new page in the same context
+                    product_page = await main_page.context.new_page()
+                    await product_page.goto(product_url, timeout=120000, wait_until="networkidle")
+                    
+                    # Get product page content
+                    product_html = await product_page.content()
+                    product_soup = BeautifulSoup(product_html, 'html.parser')
+                    
+                    # Extract additional details from product page
+                    additional_details = self._extract_product_page_details(product_soup)
+                    
+                    # Merge additional details with basic scraped part data
+                    if additional_details:
+                        # Update with additional information
+                        if (reviews_count := additional_details.get('reviews_count')) is not None:
+                            scraped_part.reviews_count = additional_details['reviews_count']
+                        if additional_details.get('seller_rating'):
+                            scraped_part.seller_rating = additional_details['seller_rating']
+                        if additional_details.get('warranty_months'):
+                            scraped_part.warranty_months = additional_details['warranty_months']
+                        if additional_details.get('specifications'):
+                            # Store specifications in a custom field or update title
+                            pass
+                    
+                    await product_page.close()
+                    
+                except Exception as e:
+                    print(f"Error extracting product page details for {product_url}: {e}")
+                    # Continue with basic data if product page fails
+            
+            return scraped_part
+            
+        except Exception as e:
+            print(f"Error extracting single part data with details: {e}")
+            return None
     
     def _extract_single_part_data(self, part_element, base_url: str, position: int) -> ScrapedPart | None:
         """
@@ -297,3 +346,134 @@ class ExistsPartScraper(BasePartScraper):
                 images.append(src)
         
         return images if images else None
+    
+    def _extract_product_page_details(self, product_soup: BeautifulSoup) -> dict:
+        """
+        Extract additional details from product page
+        """
+        details = {}
+        
+        try:
+            # Extract reviews count and rating
+            reviews_count = self._extract_product_reviews_count(product_soup)
+            if reviews_count:
+                details['reviews_count'] = reviews_count
+            
+            # Extract detailed specifications
+            specifications = self._extract_product_specifications(product_soup)
+            if specifications:
+                details['specifications'] = specifications
+            
+            # Extract warranty information from specifications
+            warranty = self._extract_warranty_from_specs(specifications)
+            if warranty:
+                details['warranty_months'] = warranty
+                
+        except Exception as e:
+            print(f"Error extracting product page details: {e}")
+        
+        return details
+    
+    def _extract_product_reviews_count(self, soup: BeautifulSoup) -> int | None:
+        """Extract reviews count from product page"""
+        try:
+            selectors = [
+                'span:contains("Відгуків")',
+            ]
+            
+            for selector in selectors:
+                elem = soup.select_one(selector)
+                if elem:
+                    text = elem.get_text()
+                    # Extract number from text like "12 Відгуків" or "Відгуки (12)"
+                    match = re.search(r'(\d+)', text)
+                    if match:
+                        return int(match.group(1))
+        except:
+            pass
+        return None
+    
+    def _extract_product_rating(self, soup: BeautifulSoup) -> float | None:
+        """Extract product rating from product page"""
+        try:
+            # Look for rating elements
+            rating_selectors = [
+                '[class*="Rating"]',
+                '[data-rating]',
+                '.stars'
+            ]
+            
+            for selector in rating_selectors:
+                elem = soup.select_one(selector)
+                if elem:
+                    # Try to extract rating from data attributes or text
+                    rating_attr = elem.get('data-rating')
+                    if rating_attr and isinstance(rating_attr, str):
+                        try:
+                            return float(rating_attr)
+                        except:
+                            pass
+                    
+                    # Try to extract from text
+                    text = elem.get_text()
+                    match = re.search(r'(\d+\.?\d*)', text)
+                    if match:
+                        try:
+                            rating = float(match.group(1))
+                            if 0 <= rating <= 5:  # Reasonable rating range
+                                return rating
+                        except:
+                            pass
+        except:
+            pass
+        return None
+    
+    def _extract_product_specifications(self, soup: BeautifulSoup) -> dict | None:
+        """Extract detailed specifications from product page"""
+        specifications = {}
+        
+        try:
+            # Find characteristics/specifications tables
+            tables = soup.select('[class*="GridTable"] table, [class*="ProductAttributes"] table')
+            
+            for table in tables:
+                if hasattr(table, 'find_all'):
+                    rows = table.find_all('tr')
+                    for row in rows:
+                        if hasattr(row, 'find_all'):
+                            cells = row.find_all(['td', 'th'])
+                            if len(cells) >= 2:
+                                key = cells[0].get_text(strip=True)
+                                value = cells[1].get_text(strip=True)
+                                if key and value:
+                                    specifications[key] = value
+        except Exception as e:
+            print(f"Error extracting specifications: {e}")
+        
+        return specifications if specifications else None
+    
+    def _extract_warranty_from_specs(self, specifications: dict | None) -> int | None:
+        """Extract warranty information from specifications"""
+        if not specifications:
+            return None
+        
+        try:
+            for key, value in specifications.items():
+                key_lower = key.lower()
+                value_lower = value.lower()
+                
+                # Look for warranty-related keys
+                if any(word in key_lower for word in ['гарантія', 'warranty', 'гарант']):
+                    # Extract months from value
+                    match = re.search(r'(\d+)', value_lower)
+                    if match:
+                        number = int(match.group(1))
+                        # Convert to months if needed
+                        if 'рік' in value_lower or 'year' in value_lower:
+                            return number * 12
+                        elif 'місяц' in value_lower or 'month' in value_lower:
+                            return number
+        except:
+            pass
+        
+        return None
