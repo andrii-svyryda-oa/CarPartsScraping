@@ -1,11 +1,19 @@
 from celery import Celery
-from common.settings import settings
+from celery_apps.base import common_task_options
 
 import common.database.models # noqa: F401
 
-celery_app = Celery(
-    'io_worker', 
-    broker=settings.REDIS_BROKER_URL, backend=settings.REDIS_RESULT_BACKEND or settings.REDIS_BROKER_URL
-)
+task_modules = ["celery_apps.io_worker.scrape_car_parts.tasks"]
 
-celery_app.conf.imports = ["celery_apps.io_worker.scraping.tasks"]
+default_queue = "io_queue"
+
+celery_app = Celery(
+    "io_worker",
+    **common_task_options, # type: ignore
+    task_default_queue=default_queue,
+    include=task_modules,
+    task_routes={
+        f"{module}.*": {"queue": default_queue}
+        for module in task_modules
+    }
+)

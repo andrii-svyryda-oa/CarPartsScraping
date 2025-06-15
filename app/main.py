@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import common.database.models # noqa: F401
-from app.routers import car_brand, car_model, part_category, part_manufacturer, part, platform, regression_model, scraped_part_data
+from app.routers import car_brand, car_model, part_category, part_manufacturer, part, platform, regression_model, scraped_part_data, scraping
 
 app = FastAPI(
     title="Car Parts API",
@@ -33,3 +33,4 @@ app.include_router(part.router)
 app.include_router(platform.router)
 app.include_router(regression_model.router)
 app.include_router(scraped_part_data.router)
+app.include_router(scraping.router)

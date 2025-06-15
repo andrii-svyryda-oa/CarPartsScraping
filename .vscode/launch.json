@@ -6,16 +6,7 @@
       "type": "debugpy",
       "request": "launch",
       "module": "uvicorn",
-      "args": [
-        "app.main:app",
-        "--reload",
-        "--host",
-        "0.0.0.0",
-        "--port",
-        "8000",
-        "--workers",
-        "1"
-      ],
+      "args": ["app.main:app", "--port", "8000", "--workers", "1"],
       "python": "${workspaceFolder}/.venv/Scripts/python.exe",
       "jinja": true,
       "justMyCode": true
@@ -30,16 +21,18 @@
         "-A",
         "celery_apps.io_worker.main.celery_app",
         "worker",
+        "-n",
+        "io-worker",
+        "-Q",
+        "io_queue",
         "--loglevel=info",
         "--pool",
         "threads",
         "--concurrency",
-        "4",
-        "-Q",
-        "io_queue"
+        "4"
       ],
       "python": "${workspaceFolder}/.venv/Scripts/python.exe",
-      "justMyCode": true,
+      "justMyCode": false,
       "jinja": true
     },
     {
