@@ -7,6 +7,7 @@ from .platform import Platform
 from .regression_model import RegressionModel
 from .scraped_part_data import ScrapedPartData
 from .part_model import part_model_association
+from .car_model_platform import CarModelPlatform
 
 __all__ = [
     "CarBrand",
@@ -17,5 +18,6 @@ __all__ = [
     "Platform",
     "RegressionModel",
     "ScrapedPartData",
-    "part_model_association"
+    "part_model_association",
+    "CarModelPlatform"
 ]

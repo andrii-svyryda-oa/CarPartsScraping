@@ -1,12 +1,11 @@
 from pydantic import BaseModel
-from decimal import Decimal
 import uuid
 
 class ScrapedPartDataBase(BaseModel):
     url: str
     title_on_platform: str
     article_number: str
-    price: Decimal
+    price: float
     availability_status: str
     delivery_days: int | None = None
     seller_name: str
@@ -28,7 +27,7 @@ class ScrapedPartDataUpdate(BaseModel):
     url: str | None = None
     title_on_platform: str | None = None
     article_number: str | None = None
-    price: Decimal | None = None
+    price: float | None = None
     availability_status: str | None = None
     delivery_days: int | None = None
     seller_name: str | None = None

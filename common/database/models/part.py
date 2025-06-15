@@ -18,7 +18,7 @@ class Part(Base):
     description: Mapped[str] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     
-    category = relationship("PartCategory", back_populates="parts")
-    manufacturer = relationship("PartManufacturer", back_populates="parts")
+    category = relationship("PartCategory")
+    manufacturer = relationship("PartManufacturer")
     car_models = relationship("CarModel", secondary="part_models", back_populates="parts")
     
