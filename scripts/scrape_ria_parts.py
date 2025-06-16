@@ -16,20 +16,20 @@ from common.database.models.car_model_platform import CarModelPlatform
 from common.database.models.part_category import PartCategory
 from common.services.scraping.parts.resolver import get_scraper
 
-scraper_cls = get_scraper("exist")
+scraper_cls = get_scraper("ria")
 
 if not scraper_cls:
     raise ValueError("Scraper not found")
 
 scraper = scraper_cls(
-    platform_url="https://exist.ua/uk/volkswagen-cars/golf-vii-5g1-be1-13954/modif-60377/",
-    category_names=["Двірники"],
-    pages=1
+    platform_url="https://zapchasti.ria.com/uk/car/101041/c/legkovye/",
+    category_names=["Двірник"],
+    pages=4
 )
 
 async def main():
     scraped_data = await scraper()
     
-    json.dump([jsonable_encoder(data.model_dump()) for data in scraped_data], open("scripts/data/scraped_exist_data.json", "w"))
+    json.dump([jsonable_encoder(data.model_dump()) for data in scraped_data], open("scripts/data/scraped_ria_data.json", "w"))
 
 asyncio.run(main())

@@ -26,7 +26,7 @@ class ScrapedPart(BaseModel):
 @dataclass
 class BasePartScraper:
     platform_url: str
-    category: str
+    category_names: list[str]
     pages: int = 10
     
     @abstractmethod

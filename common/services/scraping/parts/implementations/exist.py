@@ -22,7 +22,7 @@ class ExistsPartScraper(BasePartScraper):
                 await page.wait_for_timeout(1000)  # Wait for dynamic content to load
                 
                 # Find parts category section based on part_category.name
-                category_found = await self._find_and_click_category(page, self.category)
+                category_found = await self._find_and_click_category(page)
                 
                 if category_found:
                     # Wait for parts to load after category selection
@@ -37,31 +37,21 @@ class ExistsPartScraper(BasePartScraper):
         
         return scraped_parts
     
-    async def _find_and_click_category(self, page, category_name: str) -> bool:
+    async def _find_and_click_category(self, page) -> bool:
         """
         Find and click on the specified category
         """
         try:
-            try:
-                element = page.locator(f"[class^='PopularCategoriesstyle__PopularCategoriesList-sc-'] a[aria-label='{category_name}']").first
-                if await element.is_visible():
-                    await element.click()
-                    return True
-                else: 
-                    print(f"Category {category_name} not found")
-            except Exception as e:
-                print(f"Error finding category: {e}")
-
-            nav_links = await page.locator("a, button").all()
-            for link in nav_links:
+            for category_name in self.category_names:
                 try:
-                    text_content = await link.text_content()
-                    if text_content and category_name.lower() in text_content.lower():
-                        await link.click()
+                    element = page.locator(f"[class^='PopularCategoriesstyle__PopularCategoriesList-sc-'] a[aria-label='{category_name}']").first
+                    if await element.is_visible():
+                        await element.click()
                         return True
-                except:
-                    continue
-                    
+                    else: 
+                        print(f"Category {category_name} not found")
+                except Exception as e:
+                    print(f"Error finding category: {e}")
             return False
         except Exception as e:
             print(f"Error finding category: {e}")
@@ -70,6 +60,7 @@ class ExistsPartScraper(BasePartScraper):
     async def _extract_all_pages_parts_data(self, page: Page) -> list[ScrapedPart]:
         scraped_parts = []
         current_page = 1
+        handled_parts = 0
         
         while current_page <= self.pages:
             print(f"Scraping page {current_page}")
@@ -77,7 +68,9 @@ class ExistsPartScraper(BasePartScraper):
                 await page.wait_for_timeout(2000)
                 html_content = await page.content()
                 soup = BeautifulSoup(html_content, 'html.parser')
-                scraped_parts.extend(await self._extract_parts_data(soup, page.url, page))
+                parts_data, total_parts = await self._extract_parts_data(soup, page.url, page, handled_parts)
+                scraped_parts.extend(parts_data)
+                handled_parts += total_parts
                 
                 next_button_selector = '[aria-label="nextPage"]'
                 next_page_button = soup.select_one(next_button_selector)
@@ -93,23 +86,23 @@ class ExistsPartScraper(BasePartScraper):
 
         return scraped_parts
         
-    async def _extract_parts_data(self, soup: BeautifulSoup, current_url: str, page: Page) -> list[ScrapedPart]:
+    async def _extract_parts_data(self, soup: BeautifulSoup, current_url: str, page: Page, handled_parts: int) -> tuple[list[ScrapedPart], int]:
         scraped_parts = []
         
         parts_elements = soup.select('[class^="Liststyle__CatalogueList-sc-"] [class^="ListItemstyle__CatalogueListItem-"]')
         
         print(f"Found {len(parts_elements)} product items")
         
-        for index, part_element in enumerate(parts_elements):  # Limit to first 50 results
+        for index, part_element in enumerate(parts_elements):  
             try:
-                scraped_part = await self._extract_single_part_data_with_details(part_element, current_url, index + 1, page)
+                scraped_part = await self._extract_single_part_data_with_details(part_element, current_url, index + 1 + handled_parts, page)
                 if scraped_part:
                     scraped_parts.append(scraped_part)
             except Exception as e:
                 print(f"Error extracting part data for item {index + 1}: {e}")
                 continue
         
-        return scraped_parts
+        return scraped_parts, len(parts_elements)
     
     async def _extract_single_part_data_with_details(self, part_element, base_url: str, position: int, main_page: Page) -> ScrapedPart | None:
         """

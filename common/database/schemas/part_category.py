@@ -3,6 +3,7 @@ from pydantic import BaseModel
 class PartCategoryBase(BaseModel):
     name: str
     description: str
+    possible_names: list[str]
 
 class PartCategoryCreate(PartCategoryBase):
     pass
