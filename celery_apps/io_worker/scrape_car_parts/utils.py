@@ -118,6 +118,8 @@ async def store_category_results(
                 seller_type=result["seller_type"],
                 location=result["location"],
                 search_position=result["search_position"],
+                reviews_count=result["reviews_count"],
+                images=result["images"]
             )
 
             await scraped_part_data_crud.create(obj_in=scraped_part_data_create, commit=False)        

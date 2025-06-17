@@ -2,6 +2,9 @@ from pydantic import BaseModel
 from datetime import datetime
 import uuid
 
+from common.services.regression.price_regression.predict import PricePredictionResult
+from common.services.regression.price_regression.train import PricePredictionInput
+
 class CreateRegressionModelIn(BaseModel):
     name: str
     target_variable: str
@@ -38,3 +41,13 @@ class RegressionModelOut(BaseModel):
     category_id: uuid.UUID
     last_trained_at: datetime
     training_data_count: int 
+    
+class TrainRegressionModelIn(BaseModel):
+    category_id: uuid.UUID
+    name: str
+    
+class PricePredictionIn(PricePredictionInput):
+    pass
+
+class PricePredictionOut(PricePredictionResult):
+    pass

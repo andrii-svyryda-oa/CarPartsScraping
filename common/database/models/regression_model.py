@@ -19,5 +19,8 @@ class RegressionModel(Base):
     category_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("part_categories.id"), nullable=False)
     last_trained_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     training_data_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    preprocessing_params: Mapped[dict] = mapped_column(JSON, nullable=False)
+    validation_metrics: Mapped[dict] = mapped_column(JSON, nullable=False)
+    feature_importance: Mapped[dict] = mapped_column(JSON, nullable=False)
     
     category = relationship("PartCategory")
