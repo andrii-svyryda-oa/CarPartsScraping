@@ -65,7 +65,7 @@ async def scrape_single_platform_part(
         pages=pages
     )
 
-    scraped_data = await scraper()
+    scraped_data = scraper()
     
     write_file_json_data([jsonable_encoder(data.model_dump()) for data in scraped_data], result_path)
 

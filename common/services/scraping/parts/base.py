@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from dataclasses import dataclass
+from threading import Thread
 from typing import Type
 from pydantic import BaseModel
 
@@ -27,9 +28,16 @@ class BasePartScraper:
     category_names: list[str]
     pages: int = 10
     
+    def __call__(self) -> list[ScrapedPart]:
+        thread = Thread(target=self._scrape)
+        thread.start()
+        thread.join()
+        return self._scrape()
+    
     @abstractmethod
-    async def __call__(self) -> list[ScrapedPart]:
+    def _scrape(self) -> list[ScrapedPart]:
         pass
+    
     
 
 registered_scrapers: dict[str, Type[BasePartScraper]] = {}

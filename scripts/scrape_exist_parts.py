@@ -27,9 +27,8 @@ scraper = scraper_cls(
     pages=1
 )
 
-async def main():
-    scraped_data = await scraper()
-    
-    json.dump([jsonable_encoder(data.model_dump()) for data in scraped_data], open("scripts/data/scraped_exist_data.json", "w"))
 
-asyncio.run(main())
+scraped_data = scraper()
+
+json.dump([jsonable_encoder(data.model_dump()) for data in scraped_data], open("scripts/data/scraped_exist_data.json", "w"))
+

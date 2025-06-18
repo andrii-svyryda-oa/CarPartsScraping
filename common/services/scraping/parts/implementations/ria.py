@@ -1,44 +1,40 @@
 import re
 from urllib.parse import urljoin
-from playwright.async_api import async_playwright, Page
+from playwright.sync_api import sync_playwright, Page
 from bs4 import BeautifulSoup
 
 from common.services.scraping.parts.base import BasePartScraper, implements_platform_scraper, ScrapedPart
-from common.database.models.car_model_platform import CarModelPlatform
-from common.database.models.part_category import PartCategory
 
 
 @implements_platform_scraper("ria")
 class RiaPartScraper(BasePartScraper):
-    async def __call__(self) -> list[ScrapedPart]:
+    def _scrape(self) -> list[ScrapedPart]:
         scraped_parts = []
         
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            context = await browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-            page = await context.new_page()
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            page = context.new_page()
             
             try:
                 # Navigate to the base URL
-                await page.goto(self.platform_url, timeout=120000, wait_until="networkidle")
-
-                await page.wait_for_timeout(1000)  # Wait for dynamic content to load
+                page.goto(self.platform_url, timeout=120000, wait_until="networkidle")
+                page.wait_for_timeout(1000)  # Wait for dynamic content to load
                 
-                category_found = await self._find_and_click_category(page)
+                category_found = self._find_and_click_category(page)
                 
                 if category_found:
-                    await page.wait_for_timeout(2000)
-                    
-                    scraped_parts = await self._extract_all_pages_parts_data(page)
+                    page.wait_for_timeout(2000)
+                    scraped_parts = self._extract_all_pages_parts_data(page)
                 
             except Exception as e:
                 print(f"Error scraping RIA website: {e}")
             finally:
-                await browser.close()
+                browser.close()
         
         return scraped_parts
     
-    async def _find_and_click_category(self, page) -> bool:
+    def _find_and_click_category(self, page) -> bool:
         """
         Find and click on the specified category
         """
@@ -46,8 +42,8 @@ class RiaPartScraper(BasePartScraper):
             for category_name in self.category_names:
                 try:
                     element = page.locator(f"a.catalog-rubric__link").get_by_text(category_name, exact=True).first
-                    if await element.is_visible():
-                        await element.click()
+                    if element.is_visible():
+                        element.click()
                         return True
                     else: 
                         print(f"Category {category_name} not found")
@@ -58,7 +54,7 @@ class RiaPartScraper(BasePartScraper):
             print(f"Error finding category: {e}")
             return False
         
-    async def _extract_all_pages_parts_data(self, page: Page) -> list[ScrapedPart]:
+    def _extract_all_pages_parts_data(self, page: Page) -> list[ScrapedPart]:
         scraped_parts = []
         current_page = 1
         handled_parts = 0
@@ -66,15 +62,15 @@ class RiaPartScraper(BasePartScraper):
         while current_page <= self.pages:
             print(f"Scraping page {current_page}")
             try:
-                await page.wait_for_timeout(2000)
-                html_content = await page.content()
+                page.wait_for_timeout(2000)
+                html_content = page.content()
                 soup = BeautifulSoup(html_content, 'html.parser')
-                parts_data, total_parts = await self._extract_parts_data(soup, page.url, page, handled_parts)
+                parts_data, total_parts = self._extract_parts_data(soup, page.url, page, handled_parts)
                 scraped_parts.extend(parts_data)
                 handled_parts += total_parts
                 
                 # Look for pagination and next page button
-                next_page_found = await self._navigate_to_next_page(page, soup)
+                next_page_found = self._navigate_to_next_page(page, soup)
                 if not next_page_found:
                     break
                 
@@ -85,7 +81,7 @@ class RiaPartScraper(BasePartScraper):
 
         return scraped_parts
         
-    async def _navigate_to_next_page(self, page: Page, soup: BeautifulSoup) -> bool:
+    def _navigate_to_next_page(self, page: Page, soup: BeautifulSoup) -> bool:
         """Navigate to next page if available"""
         try:
             next_links = soup.select('.page-item.next a')
@@ -98,13 +94,13 @@ class RiaPartScraper(BasePartScraper):
                 
             next_url_str = str(next_url)
             
-            await page.goto(next_url_str, timeout=120000, wait_until="networkidle")
+            page.goto(next_url_str, timeout=120000, wait_until="networkidle")
             return True
         except Exception as e:
             print(f"Error navigating to next page: {e}")
             return False
         
-    async def _extract_parts_data(self, soup: BeautifulSoup, current_url: str, page: Page, handled_parts: int) -> tuple[list[ScrapedPart], int]:
+    def _extract_parts_data(self, soup: BeautifulSoup, current_url: str, page: Page, handled_parts: int) -> tuple[list[ScrapedPart], int]:
         scraped_parts = []
         
         # Find all product items based on the RIA structure
@@ -114,7 +110,7 @@ class RiaPartScraper(BasePartScraper):
         
         for index, part_element in enumerate(parts_elements):
             try:
-                scraped_part = await self._extract_single_part_data_with_details(part_element, current_url, index + 1 + handled_parts, page)
+                scraped_part = self._extract_single_part_data_with_details(part_element, current_url, index + 1 + handled_parts, page)
                 if scraped_part:
                     scraped_parts.append(scraped_part)
             except Exception as e:
@@ -123,7 +119,7 @@ class RiaPartScraper(BasePartScraper):
         
         return scraped_parts, len(parts_elements)
     
-    async def _extract_single_part_data_with_details(self, part_element, base_url: str, position: int, main_page: Page) -> ScrapedPart | None:
+    def _extract_single_part_data_with_details(self, part_element, base_url: str, position: int, main_page: Page) -> ScrapedPart | None:
         """
         Extract data for a single part from its HTML element and additional details from product page
         """
@@ -138,13 +134,11 @@ class RiaPartScraper(BasePartScraper):
             if product_url:
                 try:
                     # Create new page in the same context
-                    product_page = await main_page.context.new_page()
-                    await product_page.goto(product_url, timeout=120000, wait_until="networkidle")
-                    
-                    # await product_page.wait_for_timeout(2000)
+                    product_page = main_page.context.new_page()
+                    product_page.goto(product_url, timeout=120000, wait_until="networkidle")
                     
                     # Get product page content
-                    product_html = await product_page.content()
+                    product_html = product_page.content()
                     product_soup = BeautifulSoup(product_html, 'html.parser')
                     
                     # Extract additional details from product page
@@ -159,7 +153,7 @@ class RiaPartScraper(BasePartScraper):
                             
                     scraped_part.images = images
                     
-                    await product_page.close()
+                    product_page.close()
                     
                 except Exception as e:
                     print(f"Error extracting product page details for {product_url}: {e}")

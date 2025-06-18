@@ -24,12 +24,9 @@ if not scraper_cls:
 scraper = scraper_cls(
     platform_url="https://zapchasti.ria.com/uk/car/101041/c/legkovye/",
     category_names=["Двірник"],
-    pages=4
+    pages=1
 )
 
-async def main():
-    scraped_data = await scraper()
-    
-    json.dump([jsonable_encoder(data.model_dump()) for data in scraped_data], open("scripts/data/scraped_ria_data.json", "w"))
+scraped_data = scraper()
 
-asyncio.run(main())
+json.dump([jsonable_encoder(data.model_dump()) for data in scraped_data], open("scripts/data/scraped_ria_data.json", "w"))
