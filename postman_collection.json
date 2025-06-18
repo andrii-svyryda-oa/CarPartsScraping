@@ -1,0 +1,1090 @@
+{
+  "info": {
+    "name": "Car Parts Scraping API",
+    "description": "API collection for car parts scraping application with CRUD operations for car brands, models, parts, manufacturers, platforms, and scraping functionality",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Car Brands",
+      "item": [
+        {
+          "name": "Get All Car Brands",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/car-brands?skip=0&limit=100",
+              "host": ["{{baseUrl}}"],
+              "path": ["car-brands"],
+              "query": [
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Car Brand by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/car-brands/:car_brand_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["car-brands", ":car_brand_id"],
+              "variable": [
+                {
+                  "key": "car_brand_id",
+                  "value": "{{car_brand_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Car Brand",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Toyota\",\n  \"country_origin\": \"Japan\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/car-brands",
+              "host": ["{{baseUrl}}"],
+              "path": ["car-brands"]
+            }
+          }
+        },
+        {
+          "name": "Update Car Brand",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Toyota Motor Corporation\",\n  \"country_origin\": \"Japan\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/car-brands/:car_brand_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["car-brands", ":car_brand_id"],
+              "variable": [
+                {
+                  "key": "car_brand_id",
+                  "value": "{{car_brand_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Car Brand",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/car-brands/:car_brand_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["car-brands", ":car_brand_id"],
+              "variable": [
+                {
+                  "key": "car_brand_id",
+                  "value": "{{car_brand_id}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Car Models",
+      "item": [
+        {
+          "name": "Get All Car Models",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/car-models?skip=0&limit=100",
+              "host": ["{{baseUrl}}"],
+              "path": ["car-models"],
+              "query": [
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Car Model by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/car-models/:car_model_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["car-models", ":car_model_id"],
+              "variable": [
+                {
+                  "key": "car_model_id",
+                  "value": "{{car_model_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Car Model",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Camry\",\n  \"brand_id\": \"{{car_brand_id}}\",\n  \"year_start\": 2020,\n  \"year_end\": 2024\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/car-models",
+              "host": ["{{baseUrl}}"],
+              "path": ["car-models"]
+            }
+          }
+        },
+        {
+          "name": "Update Car Model",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Camry Hybrid\",\n  \"year_end\": 2025\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/car-models/:car_model_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["car-models", ":car_model_id"],
+              "variable": [
+                {
+                  "key": "car_model_id",
+                  "value": "{{car_model_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Car Model",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/car-models/:car_model_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["car-models", ":car_model_id"],
+              "variable": [
+                {
+                  "key": "car_model_id",
+                  "value": "{{car_model_id}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Car Model Platforms",
+      "item": [
+        {
+          "name": "Get All Car Model Platforms",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/car-model-platforms?skip=0&limit=100",
+              "host": ["{{baseUrl}}"],
+              "path": ["car-model-platforms"],
+              "query": [
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Car Model Platform by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/car-model-platforms/:car_model_platform_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["car-model-platforms", ":car_model_platform_id"],
+              "variable": [
+                {
+                  "key": "car_model_platform_id",
+                  "value": "{{car_model_platform_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Car Model Platform",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"car_model_id\": \"{{car_model_id}}\",\n  \"platform_id\": \"{{platform_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/car-model-platforms",
+              "host": ["{{baseUrl}}"],
+              "path": ["car-model-platforms"]
+            }
+          }
+        },
+        {
+          "name": "Update Car Model Platform",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"platform_id\": \"{{platform_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/car-model-platforms/:car_model_platform_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["car-model-platforms", ":car_model_platform_id"],
+              "variable": [
+                {
+                  "key": "car_model_platform_id",
+                  "value": "{{car_model_platform_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Car Model Platform",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/car-model-platforms/:car_model_platform_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["car-model-platforms", ":car_model_platform_id"],
+              "variable": [
+                {
+                  "key": "car_model_platform_id",
+                  "value": "{{car_model_platform_id}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Platforms",
+      "item": [
+        {
+          "name": "Get All Platforms",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/platforms?skip=0&limit=100",
+              "host": ["{{baseUrl}}"],
+              "path": ["platforms"],
+              "query": [
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Platform by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/platforms/:platform_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["platforms", ":platform_id"],
+              "variable": [
+                {
+                  "key": "platform_id",
+                  "value": "{{platform_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Platform",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"exist.ua\",\n  \"url\": \"https://exist.ua\",\n  \"description\": \"Ukrainian auto parts marketplace\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/platforms",
+              "host": ["{{baseUrl}}"],
+              "path": ["platforms"]
+            }
+          }
+        },
+        {
+          "name": "Update Platform",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Leading Ukrainian auto parts marketplace\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/platforms/:platform_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["platforms", ":platform_id"],
+              "variable": [
+                {
+                  "key": "platform_id",
+                  "value": "{{platform_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Platform",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/platforms/:platform_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["platforms", ":platform_id"],
+              "variable": [
+                {
+                  "key": "platform_id",
+                  "value": "{{platform_id}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Part Categories",
+      "item": [
+        {
+          "name": "Get All Part Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/part-categories?skip=0&limit=100",
+              "host": ["{{baseUrl}}"],
+              "path": ["part-categories"],
+              "query": [
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Part Category by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/part-categories/:part_category_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["part-categories", ":part_category_id"],
+              "variable": [
+                {
+                  "key": "part_category_id",
+                  "value": "{{part_category_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Part Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Brake Pads\",\n  \"description\": \"Brake system components\",\n  \"possible_names\": [\"brake pads\", \"brake disc pads\", \"disc pads\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/part-categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["part-categories"]
+            }
+          }
+        },
+        {
+          "name": "Update Part Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Brake system friction components\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/part-categories/:part_category_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["part-categories", ":part_category_id"],
+              "variable": [
+                {
+                  "key": "part_category_id",
+                  "value": "{{part_category_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Part Category",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/part-categories/:part_category_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["part-categories", ":part_category_id"],
+              "variable": [
+                {
+                  "key": "part_category_id",
+                  "value": "{{part_category_id}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Part Manufacturers",
+      "item": [
+        {
+          "name": "Get All Part Manufacturers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/part-manufacturers?skip=0&limit=100",
+              "host": ["{{baseUrl}}"],
+              "path": ["part-manufacturers"],
+              "query": [
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Part Manufacturer by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/part-manufacturers/:part_manufacturer_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["part-manufacturers", ":part_manufacturer_id"],
+              "variable": [
+                {
+                  "key": "part_manufacturer_id",
+                  "value": "{{part_manufacturer_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Part Manufacturer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bosch\",\n  \"country_origin\": \"Germany\",\n  \"description\": \"Leading automotive parts manufacturer\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/part-manufacturers",
+              "host": ["{{baseUrl}}"],
+              "path": ["part-manufacturers"]
+            }
+          }
+        },
+        {
+          "name": "Update Part Manufacturer",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Global leader in automotive technology and parts\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/part-manufacturers/:part_manufacturer_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["part-manufacturers", ":part_manufacturer_id"],
+              "variable": [
+                {
+                  "key": "part_manufacturer_id",
+                  "value": "{{part_manufacturer_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Part Manufacturer",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/part-manufacturers/:part_manufacturer_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["part-manufacturers", ":part_manufacturer_id"],
+              "variable": [
+                {
+                  "key": "part_manufacturer_id",
+                  "value": "{{part_manufacturer_id}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Parts",
+      "item": [
+        {
+          "name": "Get All Parts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/parts?skip=0&limit=100",
+              "host": ["{{baseUrl}}"],
+              "path": ["parts"],
+              "query": [
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Part by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/parts/:part_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["parts", ":part_id"],
+              "variable": [
+                {
+                  "key": "part_id",
+                  "value": "{{part_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Part",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Front Brake Pad Set\",\n  \"part_number\": \"BP-12345\",\n  \"category_id\": \"{{part_category_id}}\",\n  \"manufacturer_id\": \"{{part_manufacturer_id}}\",\n  \"description\": \"High-performance ceramic brake pads\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/parts",
+              "host": ["{{baseUrl}}"],
+              "path": ["parts"]
+            }
+          }
+        },
+        {
+          "name": "Update Part",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Premium ceramic brake pads with enhanced durability\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/parts/:part_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["parts", ":part_id"],
+              "variable": [
+                {
+                  "key": "part_id",
+                  "value": "{{part_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Part",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/parts/:part_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["parts", ":part_id"],
+              "variable": [
+                {
+                  "key": "part_id",
+                  "value": "{{part_id}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Scraped Part Data",
+      "item": [
+        {
+          "name": "Get All Scraped Part Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/scraped-part-data?skip=0&limit=100",
+              "host": ["{{baseUrl}}"],
+              "path": ["scraped-part-data"],
+              "query": [
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Scraped Part Data by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/scraped-part-data/:scraped_part_data_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["scraped-part-data", ":scraped_part_data_id"],
+              "variable": [
+                {
+                  "key": "scraped_part_data_id",
+                  "value": "{{scraped_part_data_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Scraped Part Data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"platform_id\": \"{{platform_id}}\",\n  \"part_id\": \"{{part_id}}\",\n  \"car_model_id\": \"{{car_model_id}}\",\n  \"price\": 150.00,\n  \"availability\": true,\n  \"scraped_at\": \"2024-01-01T12:00:00Z\",\n  \"source_url\": \"https://example.com/part/12345\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/scraped-part-data",
+              "host": ["{{baseUrl}}"],
+              "path": ["scraped-part-data"]
+            }
+          }
+        },
+        {
+          "name": "Update Scraped Part Data",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 145.00,\n  \"availability\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/scraped-part-data/:scraped_part_data_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["scraped-part-data", ":scraped_part_data_id"],
+              "variable": [
+                {
+                  "key": "scraped_part_data_id",
+                  "value": "{{scraped_part_data_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Scraped Part Data",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/scraped-part-data/:scraped_part_data_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["scraped-part-data", ":scraped_part_data_id"],
+              "variable": [
+                {
+                  "key": "scraped_part_data_id",
+                  "value": "{{scraped_part_data_id}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Regression Models",
+      "item": [
+        {
+          "name": "Get All Regression Models",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/regression-models?skip=0&limit=100",
+              "host": ["{{baseUrl}}"],
+              "path": ["regression-models"],
+              "query": [
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Regression Model by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/regression-models/:regression_model_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["regression-models", ":regression_model_id"],
+              "variable": [
+                {
+                  "key": "regression_model_id",
+                  "value": "{{regression_model_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Regression Model",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Brake Pads Price Model\",\n  \"target_variable\": \"price\",\n  \"feature_variables\": [\"brand_score\", \"availability\", \"market_demand\"],\n  \"coefficients\": {\"brand_score\": 0.5, \"availability\": 0.3, \"market_demand\": 0.2},\n  \"intercept\": 50.0,\n  \"r_squared\": 0.85,\n  \"mean_squared_error\": 12.5,\n  \"category_id\": \"{{part_category_id}}\",\n  \"last_trained_at\": \"2024-01-01T12:00:00Z\",\n  \"training_data_count\": 1000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/regression-models",
+              "host": ["{{baseUrl}}"],
+              "path": ["regression-models"]
+            }
+          }
+        },
+        {
+          "name": "Update Regression Model",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"r_squared\": 0.87,\n  \"mean_squared_error\": 11.8\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/regression-models/:regression_model_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["regression-models", ":regression_model_id"],
+              "variable": [
+                {
+                  "key": "regression_model_id",
+                  "value": "{{regression_model_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Regression Model",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/regression-models/:regression_model_id",
+              "host": ["{{baseUrl}}"],
+              "path": ["regression-models", ":regression_model_id"],
+              "variable": [
+                {
+                  "key": "regression_model_id",
+                  "value": "{{regression_model_id}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Train Regression Model",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category_id\": \"{{part_category_id}}\",\n  \"name\": \"Updated Brake Pads Price Model\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/regression-models/train",
+              "host": ["{{baseUrl}}"],
+              "path": ["regression-models", "train"]
+            }
+          }
+        },
+        {
+          "name": "Predict Price",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"brand_score\": 8.5,\n  \"availability\": true,\n  \"market_demand\": 0.7\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/regression-models/:regression_model_id/predict",
+              "host": ["{{baseUrl}}"],
+              "path": ["regression-models", ":regression_model_id", "predict"],
+              "variable": [
+                {
+                  "key": "regression_model_id",
+                  "value": "{{regression_model_id}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Scraping",
+      "item": [
+        {
+          "name": "Start Scraping",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"platforms_ids\": [\"{{platform_id}}\"],\n  \"car_model_id\": \"{{car_model_id}}\",\n  \"category_ids\": [\"{{part_category_id}}\"],\n  \"pages\": 10\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/scraping/start",
+              "host": ["{{baseUrl}}"],
+              "path": ["scraping", "start"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

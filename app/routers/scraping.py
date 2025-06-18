@@ -9,3 +9,8 @@ async def start_scraping_end(
     data: ScrapingStartIn,
 ):
     celery_app.send_task("io.scraping.start", queue="io_queue", kwargs=data.model_dump())
+    
+
+@router.post("/start-all")
+async def start_all_scraping_end():
+    celery_app.send_task("io.scraping.start_all", queue="io_queue")

@@ -1,8 +1,7 @@
 from celery_apps.cpu_worker.main import celery_app
 from common.database.cruds.regression_model import RegressionModelCRUD
 from common.database.cruds.scraped_part_data import ScrapedPartDataCRUD
-from common.services.regression.price_regression.predict import PricePredictionTrainingInput
-from common.services.regression.price_regression.train import PriceRegressionTrainer
+from common.services.regression.price_regression.train import PriceRegressionTrainer, PricePredictionTrainingInput
 import uuid
 from common.database.connection import get_db_celery
 

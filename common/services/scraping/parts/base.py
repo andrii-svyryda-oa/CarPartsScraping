@@ -1,10 +1,8 @@
 from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Type
-from common.database.models.car_model_platform import CarModelPlatform
 from pydantic import BaseModel
 
-from common.database.models.part_category import PartCategory
 
 class ScrapedPart(BaseModel):
     url: str

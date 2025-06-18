@@ -4,3 +4,4 @@ from common.database.schemas.part_category import PartCategoryCreate, PartCatego
 
 class PartCategoryCRUD(BaseCRUD[PartCategory, PartCategoryCreate, PartCategoryUpdate]):
     model = PartCategory
+    

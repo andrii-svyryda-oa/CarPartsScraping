@@ -11,3 +11,4 @@ class PartCategoryCreate(PartCategoryBase):
 class PartCategoryUpdate(BaseModel):
     name: str | None = None
     description: str | None = None
+    possible_names: list[str] | None = None

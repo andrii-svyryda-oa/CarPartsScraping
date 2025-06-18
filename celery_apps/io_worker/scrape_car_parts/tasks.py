@@ -50,7 +50,7 @@ async def concat_and_store_results(
 async def scrape_single_platform_part(
     platform_name: str,
     platform_car_model_url: str, 
-    category: str, 
+    category_names: list[str], 
     pages: int,
     result_path: str
 ):
@@ -61,7 +61,7 @@ async def scrape_single_platform_part(
 
     scraper = scraper_cls(
         platform_url=platform_car_model_url,
-        category=category,
+        category_names=category_names,
         pages=pages
     )
 
@@ -81,8 +81,18 @@ async def start_scraping(
         car_model_platform_crud = CarModelPlatformCRUD(db)
         category_crud = PartCategoryCRUD(db)
 
-        car_model_platforms = await car_model_platform_crud.get_by_platforms_and_cars(platforms_ids, car_model_id)
-        categories = await category_crud.get_by_ids(category_ids)
+        if not platforms_ids:
+            car_model_platforms = await car_model_platform_crud.get_by_car(car_model_id)
+        else:
+            car_model_platforms = await car_model_platform_crud.get_by_platforms_and_car(platforms_ids, car_model_id)
+
+        if not category_ids:
+            categories = await category_crud.get_multi(
+                skip=0,
+                limit=10
+            )
+        else:
+            categories = await category_crud.get_by_ids(category_ids)
         
     run_id = str(uuid4())
     
@@ -100,7 +110,7 @@ async def start_scraping(
                 kwargs={
                     "platform_name": car_model_platform.platform.name, 
                     "platform_car_model_url": car_model_platform.platform_url, 
-                    "category": category.name, 
+                    "category_names": category.possible_names, 
                     "pages": pages, 
                     "result_path": result_path
                 }
@@ -123,3 +133,26 @@ async def start_scraping(
         scrape_all_group,
         concat_and_store_results_task
     ).apply_async()
+    
+
+@celery_app.task(name="io.scraping.start_all")
+async def start_all_scraping():
+    async with get_db_celery() as db:
+        car_model_crud = CarModelCRUD(db)
+        car_models = await car_model_crud.get_multi(
+            skip=0,
+            limit=10
+        )
+        
+    for car_model in car_models:
+        celery_app.signature(
+            "io.scraping.start",
+            kwargs={
+                "platforms_ids": [],
+                "car_model_id": car_model.id,
+                "category_ids": [],
+                "pages": 10
+            },
+            queue="io_queue"
+        ).apply_async()
+        
