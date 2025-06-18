@@ -3,7 +3,11 @@ from urllib.parse import urljoin
 from playwright.async_api import async_playwright, Page
 from bs4 import BeautifulSoup
 
+from common.services.scraping.agents_provider import agents_provider
 from common.services.scraping.parts.base import BasePartScraper, implements_platform_scraper, ScrapedPart
+
+
+user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
 
 @implements_platform_scraper("exist")
@@ -17,7 +21,7 @@ class ExistsPartScraper(BasePartScraper):
             page = await context.new_page()
             
             try:
-                # Navigate to the base URL
+                # Navigate to tee base URL
                 await page.goto(self.platform_url, timeout=120000, wait_until="networkidle")
                 await page.wait_for_timeout(1000)  # Wait for dynamic content to load
                 
@@ -120,6 +124,7 @@ class ExistsPartScraper(BasePartScraper):
                 try:
                     # Create new page in the same context
                     product_page = await main_page.context.new_page()
+                    await product_page.set_extra_http_headers({"User-Agent": agents_provider.get_agent()})
                     await product_page.goto(product_url, timeout=120000, wait_until="networkidle")
                     
                     # Get product page content

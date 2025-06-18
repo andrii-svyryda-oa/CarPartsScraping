@@ -51,3 +51,11 @@ class PricePredictionIn(PricePredictionInput):
 
 class PricePredictionOut(PricePredictionResult):
     pass
+
+class ModelStatsIn(BaseModel):
+    min_reviews_count: int
+    max_reviews_count: int
+    min_search_position: int
+    max_search_position: int
+    manufacturers: list[str]
+    platforms: list[str]

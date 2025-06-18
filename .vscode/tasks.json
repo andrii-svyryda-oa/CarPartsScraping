@@ -4,11 +4,10 @@
     {
       "label": "Celery Flower",
       "type": "shell",
-      "command": "celery",
+      "command": "/bin/bash",
       "args": [
-        "--app=celery_apps.io_worker.main:celery_app",
-        "flower",
-        "--port=5555"
+        "-c",
+        "source .venv/bin/activate && celery --app=celery_apps.io_worker.main:celery_app flower --address=0.0.0.0 --port=5555"
       ],
       "group": "build",
       "presentation": {
@@ -25,11 +24,10 @@
     {
       "label": "Celery Beat",
       "type": "shell",
-      "command": "celery",
+      "command": "/bin/bash",
       "args": [
-        "--app=celery_apps.io_worker.main:celery_app",
-        "beat",
-        "--loglevel=info"
+        "-c",
+        "source .venv/bin/activate && celery --app=celery_apps.io_worker.main:celery_app beat --loglevel=info"
       ],
       "group": "build",
       "presentation": {

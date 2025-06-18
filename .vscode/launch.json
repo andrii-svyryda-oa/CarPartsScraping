@@ -7,7 +7,7 @@
       "request": "launch",
       "module": "uvicorn",
       "args": ["app.main:app", "--port", "8000", "--workers", "1"],
-      "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "python": "${workspaceFolder}/.venv/bin/python",
       "jinja": true,
       "justMyCode": true
     },
@@ -27,11 +27,11 @@
         "io_queue",
         "--loglevel=info",
         "--pool",
-        "threads",
+        "prefork",
         "--concurrency",
         "4"
       ],
-      "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "python": "${workspaceFolder}/.venv/bin/python",
       "justMyCode": false,
       "jinja": true
     },
@@ -47,13 +47,13 @@
         "worker",
         "--loglevel=info",
         "--pool",
-        "solo",
+        "prefork",
         "--concurrency",
         "1",
         "-Q",
         "cpu_queue"
       ],
-      "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "python": "${workspaceFolder}/.venv/bin/python",
       "justMyCode": true,
       "jinja": true
     }

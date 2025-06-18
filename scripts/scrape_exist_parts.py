@@ -24,7 +24,7 @@ if not scraper_cls:
 scraper = scraper_cls(
     platform_url="https://exist.ua/uk/volkswagen-cars/golf-vii-5g1-be1-13954/modif-60377/",
     category_names=["Двірники"],
-    pages=1
+    pages=20
 )
 
 async def main():

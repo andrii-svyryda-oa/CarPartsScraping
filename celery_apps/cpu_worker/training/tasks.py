@@ -6,7 +6,7 @@ import uuid
 from common.database.connection import get_db_celery
 
 
-@celery_app.task
+@celery_app.task(name="cpu.training.train_price_regression_model")
 async def train_price_regression_model(category_id: uuid.UUID, name: str):
     async with get_db_celery() as db:
         scraped_data_crud = ScrapedPartDataCRUD(db)
@@ -21,13 +21,11 @@ async def train_price_regression_model(category_id: uuid.UUID, name: str):
             category_id=category_id,
             training_records=[
                 PricePredictionTrainingInput(
-                    seller_name=record.seller_name,
-                    location=record.location,
-                    platform=record.platform_id,
-                    article_number=record.article_number,
-                    reviews_count=record.reviews_count,
+                    platform=record.platform.name,
+                    reviews_count=record.reviews_count or 0,
                     search_position=record.search_position,
-                    price=record.price
+                    price=record.price,
+                    manufacturer=record.seller_name
                 )
                 for record in scraped_data
             ]

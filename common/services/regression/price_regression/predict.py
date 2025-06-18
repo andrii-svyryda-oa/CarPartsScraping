@@ -11,7 +11,6 @@ class PricePredictionResult(BaseModel):
     confidence_interval_lower: float
     confidence_interval_upper: float
     model_r_squared: float
-    model_version: str
 
 class PriceRegressionPredictor:
     scaler: StandardScaler
@@ -74,8 +73,7 @@ class PriceRegressionPredictor:
             predicted_value=float(prediction),
             confidence_interval_lower=float(max(0, prediction - confidence_interval)),
             confidence_interval_upper=float(prediction + confidence_interval),
-            model_r_squared=self.model.r_squared,
-            model_version=self.model.model_version
+            model_r_squared=self.model.r_squared
         )
         
     def predict_price_multiple(self, model: RegressionModel, inputs: List[PricePredictionInput]) -> List[PricePredictionResult]:

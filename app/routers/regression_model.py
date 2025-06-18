@@ -1,8 +1,9 @@
 from fastapi import APIRouter, status
 from app.dependencies.regression_model import RegressionModelCRUDDep, RegressionModelDep
-from app.schemas.regression_model import CreateRegressionModelIn, PricePredictionIn, PricePredictionOut, TrainRegressionModelIn, UpdateRegressionModelIn, RegressionModelOut
+from app.schemas.regression_model import CreateRegressionModelIn, ModelStatsIn, PricePredictionIn, PricePredictionOut, TrainRegressionModelIn, UpdateRegressionModelIn, RegressionModelOut
 from common.database.schemas.regression_model import RegressionModelCreate, RegressionModelUpdate
 from celery_apps.io_worker.main import celery_app
+from common.services.regression.price_regression.metrics import PriceDependencyGraphicsBuilder
 from common.services.regression.price_regression.predict import PriceRegressionPredictor
 
 router = APIRouter(prefix="/regression-models", tags=["regression-models"])
@@ -51,13 +52,13 @@ async def delete_regression_model(regression_model: RegressionModelDep, regressi
 async def train_regression_model(
     train_regression_model_in: TrainRegressionModelIn
 ):
-    celery_app.send_task("io.scraping.train_price_regression_model", kwargs={
+    celery_app.send_task("cpu.training.train_price_regression_model", kwargs={
         "category_id": train_regression_model_in.category_id,
         "name": train_regression_model_in.name
-    })
+    }, queue="cpu_queue")
     
 
-@router.post("/predict", response_model=PricePredictionOut)
+@router.post("/{regression_model_id}/predict", response_model=PricePredictionOut)
 async def predict_price(
     predict_price_in: PricePredictionIn,
     regression_model: RegressionModelDep
@@ -67,3 +68,23 @@ async def predict_price(
     prediction = predictor.predict_price(input=predict_price_in)
     
     return prediction
+
+@router.post("/{regression_model_id}/model-stats")
+async def get_model_stats(
+    model_stats_in: ModelStatsIn,
+    regression_model: RegressionModelDep,
+):
+    graphics_builder = PriceDependencyGraphicsBuilder(
+        min_rating=model_stats_in.min_reviews_count,
+        max_rating=model_stats_in.max_reviews_count,
+        min_search_position=model_stats_in.min_search_position,
+        max_search_position=model_stats_in.max_search_position,
+        manufacturers=model_stats_in.manufacturers,
+        platforms=model_stats_in.platforms,
+        regression_model=regression_model
+    )
+    
+    graphics_builder.generate_all_graphics()
+    
+    return {"graphics_dir": graphics_builder.output_dir}
+    

@@ -1,3 +1,4 @@
+from datetime import datetime
 import pandas as pd
 import numpy as np
 from pydantic import BaseModel
@@ -7,15 +8,13 @@ from sklearn.model_selection import train_test_split
 from typing import List
 import uuid
 
-from common.database.models.regression_model import RegressionModel
+from common.database.schemas.regression_model import RegressionModelCreate
 
 class PricePredictionInput(BaseModel):
-    seller_name: str
-    location: str
     platform: str
-    article_number: str
     reviews_count: int
     search_position: int
+    manufacturer: str
     
     
 class PricePredictionTrainingInput(PricePredictionInput):
@@ -32,7 +31,7 @@ class PriceRegressionTrainer:
     def _prepare_features(self, df: pd.DataFrame) -> tuple[pd.DataFrame, list[str], dict[str, LabelEncoder]]:
         prepared_data = df.copy()
         
-        categorical_features = ['seller_name', 'location', 'platform', "article_number"]
+        categorical_features = ['platform', 'manufacturer']
         numeric_features = ['reviews_count', 'search_position']
 
         feature_variables = categorical_features + numeric_features
@@ -59,7 +58,7 @@ class PriceRegressionTrainer:
         name: str,
         category_id: uuid.UUID,
         training_records: List[PricePredictionTrainingInput]
-    ) -> RegressionModel:
+    ) -> RegressionModelCreate:
         data = pd.DataFrame([record.model_dump() for record in training_records])
             
         scaler = StandardScaler()
@@ -90,7 +89,7 @@ class PriceRegressionTrainer:
                 importance = abs(model.tvalues[i]) / sum(abs(model.tvalues[1:]))
                 feature_importance[feature] = float(importance)
                 
-        return RegressionModel(
+        return RegressionModelCreate(
             name=name,
             target_variable="price",
             feature_variables=feature_names,
@@ -113,6 +112,7 @@ class PriceRegressionTrainer:
                 'f_statistic': float(model.fvalue),
                 'f_pvalue': float(model.f_pvalue)
             },
-            feature_importance=feature_importance
+            feature_importance=feature_importance,
+            last_trained_at=datetime.now(),
         )
     

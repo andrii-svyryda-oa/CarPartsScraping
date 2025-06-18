@@ -10,6 +10,9 @@ class RegressionModelBase(BaseModel):
     intercept: float
     r_squared: float
     mean_squared_error: float
+    preprocessing_params: dict
+    validation_metrics: dict
+    feature_importance: dict
     training_data_count: int
 
 class RegressionModelCreate(RegressionModelBase):
